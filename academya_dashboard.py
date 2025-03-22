@@ -6,12 +6,11 @@ import plotly.express as px
 from segment_function import segment_age2, segment_balance, segment_campaign2, segment_duration, segment_pdays2, segment_previous2,\
 plot_segmented_variable, new_features, segment_age, segment_campaign, segment_previous, segment_pdays,\
 preprocess_dataframe, replace_outliers_series, apply_transform_series, outlier_process
-import pickle
 import joblib
 import warnings
 warnings.filterwarnings('ignore')
 
-st.set_page_config(page_title='Academya Dashboard',
+st.set_page_config(page_title='Dashboard Academya',
                    page_icon=':bank:', layout='wide')
 
 st.markdown(
@@ -37,8 +36,8 @@ df = df.applymap(lambda x: x.capitalize() if isinstance(x, str) else x)
 
 st.markdown("""<h1 style='text-align: center; font-size: 35px; font-weight: bold; 
             color: #F56060; font-family: Futura, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-top: -50px;'>
-            Bank Marketing Performance Analysis</h1>
-            <h3 style="text-align: center; font-weight: normal; font-size: 20px; color: gray;">Who Subscribed and Why?</h3>""", unsafe_allow_html=True)
+            Analisis Performa Pemasaran Bank</h1>
+            <h3 style="text-align: center; font-weight: normal; font-size: 20px; color: gray;">Siapa yang Berlangganan dan Mengapa?</h3>""", unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True) 
 
@@ -90,7 +89,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-st.sidebar.markdown('<div class="sidebar-title">Navigation</div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-title">Navigasi</div>', unsafe_allow_html=True)
 
 # Initialize session state for navigation
 if "page" not in st.session_state:
@@ -100,11 +99,11 @@ if "page" not in st.session_state:
 if st.sidebar.button("📊 Dataset Explorer", key="explorer"):
     st.session_state.page = "Dataset Explorer"
 
-if st.sidebar.button("💡 Story Behind the Data", key="story"):
-    st.session_state.page = "Story Behind the Data"
+if st.sidebar.button("💡 Di Balik Data", key="story"):
+    st.session_state.page = "Di Balik Data"
 
-if st.sidebar.button("🤖 Predictive Model", key="predictive"):
-    st.session_state.page = "Predictive Model"
+if st.sidebar.button("🤖 Model Prediksi", key="predictive"):
+    st.session_state.page = "Model Prediksi"
 
 # JavaScript to set active button styling
 st.sidebar.markdown(
@@ -112,7 +111,7 @@ st.sidebar.markdown(
     <script>
         var buttons = window.parent.document.querySelectorAll('.sidebar-button');
         buttons.forEach(btn => btn.classList.remove('active'));
-        buttons[{["Dataset Explorer", "Story Behind the Data", "Predictive Model"].index(st.session_state.page)}].classList.add('active');
+        buttons[{["Dataset Explorer", "Di Balik Data", "Model Prediksi"].index(st.session_state.page)}].classList.add('active');
     </script>
     """,
     unsafe_allow_html=True
@@ -398,7 +397,7 @@ if st.session_state.page == "Dataset Explorer":
                 )
                 col.plotly_chart(fig, use_container_width=True)
 
-elif st.session_state.page == "Story Behind the Data":
+elif st.session_state.page == "Di Balik Data":
     df2 = pd.read_csv('bank-full.csv')
     df2 = df2.rename(columns={'y': 'Subscribed'})
     
@@ -837,7 +836,7 @@ elif st.session_state.page == "Story Behind the Data":
         """, unsafe_allow_html=True)
 
 
-elif st.session_state.page == "Predictive Model":
+elif st.session_state.page == "Model Prediksi":
 
     pipeline_prep = joblib.load('pipeline_prep.pkl')
     pipeline_trans = joblib.load('pipeline_trans.pkl')
