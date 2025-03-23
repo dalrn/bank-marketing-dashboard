@@ -46,9 +46,11 @@ st.sidebar.markdown(
     """
     <style>
     [data-testid="stSidebarContent"] {
-        background-color: #1E1E1E; /* Dark sidebar background */
+        background-color: #1E1E1E;
         padding: 25px;
         border-radius: 10px;
+        align-items: center;
+        text-align: center;
     }
 
     .sidebar-title {
@@ -118,15 +120,15 @@ st.sidebar.markdown(
 )
 
 # Add dropdown for "About the Dataset"
-with st.sidebar.expander("About the Dataset"):
+with st.sidebar.expander("Tentang Dataset"):
     st.markdown("""<div style='text-align: justify;'>
-        The dataset contains records of direct marketing campaigns of a Portuguese banking institution from May 2008 to
-        November 2010. The product offered were term deposits and the marketing campaigns were based on phone calls.
+        Dataset ini berisi catatan kampanye pemasaran langsung dari sebuah institusi perbankan di Portugal dari Mei 2008 hingga November 2010.
+        Produk yang ditawarkan adalah deposito berjangka, dan kampanye pemasaran dilakukan melalui panggilan telepon.
     </div>""", unsafe_allow_html=True)
     st.write("")
     st.markdown("""<div style='text-align: justify;'>
-        A more detailed description of the dataset and its variables can be found 
-        <a href="https://pastebin.com/B6b8qRgB" target="_blank">here</a>.
+        Deskripsi lebih lanjut mengenai dataset dan setiap variabelnya dapat ditemukan di 
+        <a href="https://pastebin.com/B6b8qRgB" target="_blank">sini</a>.
     </div>""", unsafe_allow_html=True)
 
 
@@ -138,11 +140,11 @@ if st.session_state.page == "Dataset Explorer":
         st.markdown("<div style='color: #FF4B4B;font-size: 27px;font-weight:bold;margin-bottom: 15px;'>Filter</div>", unsafe_allow_html=True)
 
         # Toggle to show/hide missing values
-        show_missing = st.checkbox("Show missing values", value=True)
+        show_missing = st.checkbox("Sembunyikan nilai hilang", value=False)
         
         # Categorical Filters
         categorical_cols = df.select_dtypes(include='object').columns.tolist()
-        selected_cat_var = st.multiselect("Filter by (categorical): ", categorical_cols)
+        selected_cat_var = st.multiselect("Filter berdasarkan (kategori): ", categorical_cols, default=None, placeholder='Pilih opsi')
         
         selected_values = {}
 
@@ -174,7 +176,7 @@ if st.session_state.page == "Dataset Explorer":
         
         # Numerical Filters
         numerical_cols = df.select_dtypes(include='number').columns.tolist()
-        selected_num_vars = st.multiselect("Filter by (numerical):", numerical_cols)
+        selected_num_vars = st.multiselect("Filter berdasarkan (numerik):", numerical_cols, default=None, placeholder='Pilih opsi')
 
         for selected_num_var in selected_num_vars:
             col1_3, col2_3 = st.columns(2)
@@ -227,31 +229,31 @@ if st.session_state.page == "Dataset Explorer":
         # Sort by
         st.markdown("<div style='color: #FF4B4B;font-size: 27px;font-weight:bold;margin-bottom: 15px;'>Sort</div>", unsafe_allow_html=True)
 
-        selected_sort_vars = st.multiselect("Sort by:", df.columns)
+        selected_sort_vars = st.multiselect("Urutkan berdasarkan:", df.columns, default=None, placeholder='Pilih opsi')
 
-        sort_order = st.radio("Sort by:", ["Ascending", "Descending"], horizontal=True)
+        sort_order = st.radio("Urutan", ["Menaik", "Menurun"], horizontal=True)
 
         if selected_sort_vars:
-            df = df.sort_values(by=selected_sort_vars, ascending=(sort_order == "Ascending"))
+            df = df.sort_values(by=selected_sort_vars, ascending=(sort_order == "Menaik"))
 
     with col2:
-        if not show_missing:
+        if show_missing:
             df = df.dropna()
         st.dataframe(df, hide_index=True, use_container_width=True)
-        st.markdown(f"<div style='text-align: right; font-size: 14px'>Showing <strong style='color: #F56060;'>{len(df):,}</strong> past marketing records</div>",
+        st.markdown(f"<div style='text-align: right; font-size: 14px'>Menunjukkan <strong style='color: #F56060;'>{len(df):,}</strong> catatan pemasaran</div>",
                     unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         # Split the second column into two sub-columns
         sub_col1, _, sub_col2 = st.columns([1.1, 0.01, 0.8])
         
         with sub_col1:
-            st.markdown("### Subscription Percentage")
+            st.markdown("### Tingkat Konversi")
             st.markdown("<br>", unsafe_allow_html=True)
 
             # Calculate the percentage of Y = "Yes"
             yes_count = df['Subscribed'].value_counts().get('Yes', 0)
             no_count = df['Subscribed'].value_counts().get('No', 0)
-            yes_percentage = round((yes_count/(yes_count+no_count))*100)
+            yes_percentage = round((yes_count/(yes_count+no_count))*100, 1)
 
             if yes_percentage <= 30:
                 yes_color = 'red'
@@ -261,24 +263,25 @@ if st.session_state.page == "Dataset Explorer":
                 yes_color = '#FFD700'
 
             # Create a donut chart using Altair
-            source = pd.DataFrame({'Subscribed': ['Yes', 'No'], 'Count': [yes_count, no_count], '%': [yes_percentage, 100-yes_percentage]})  
-            source['Legend_Label'] = source.apply(lambda x: f"{x['Subscribed']} ({x['Count']})", axis=1)
+            source = pd.DataFrame({'Berlangganan': ['Ya', 'Tidak'], 'Jumlah': [yes_count, no_count], '%': [yes_percentage, 100-yes_percentage]})  
+            source['Legend_Label'] = source.apply(lambda x: f"{x['Berlangganan']} ({x['Jumlah']})", axis=1)
 
             chart = alt.Chart(source).mark_arc(innerRadius=70, outerRadius=90).encode(
-                theta=alt.Theta(field="Count", type="quantitative"),
+                theta=alt.Theta(field="Jumlah", type="quantitative"),
                 color=alt.Color(field="Legend_Label", type="nominal",
                                 scale=alt.Scale(domain=source["Legend_Label"].tolist(), range=[yes_color, '#D3D3D3']),
-                                legend=alt.Legend(title="Subscribed (Count)")),
-                tooltip=["Subscribed", "Count", "%"]
+                                legend=alt.Legend(title="Berlangganan (Jumlah)")),
+                tooltip=["Berlangganan", "Jumlah", "%"]
             ).properties(
                 width='container',
                 height=250
             )
 
-            text = alt.Chart(pd.DataFrame({'text': [f"{yes_percentage}%"]})).mark_text(
+            text = alt.Chart(pd.DataFrame({'text': [f"{yes_percentage}%"], 'tooltip': [f"Persentase: {yes_percentage}%"]})).mark_text(
                 size=30, fontWeight='bold', color=yes_color
             ).encode(
-                text='text:N'
+                text='text:N',
+                tooltip='tooltip:N'
             ).properties(
                 width='container',
                 height=250
@@ -288,44 +291,64 @@ if st.session_state.page == "Dataset Explorer":
         
         with sub_col2:
             st.markdown(f"""  
-                #### Out of those <span style='color:{yes_color};'>{yes_percentage}%</span> who subscribed...  
+                #### Dari <span style='color:{yes_color};'>{yes_percentage}%</span> yang berlangganan...  
             """, unsafe_allow_html=True)     
 
             df_yes = df[df['Subscribed'] == 'Yes']      
-            def display_percentage(df, column, description):
+            def display_percentage(df, column):
                 most_common = df[column].value_counts().idxmax().lower()
                 count = df[column].value_counts().max()
                 percentage = round((count / len(df)) * 100)
 
-                if column == "Poutcome":
-                    if most_common == "unknown":
-                        description = "had an <span style='color: #F56060;'>unknown</span> outcome last campaign"
-                    elif most_common == "success":
-                        description = "<span style='color: #F56060;'>subscribed</span> to the product last campaign"
-                    elif most_common == "failure":
-                        description = "<span style='color: #F56060;'>did not subscribe</span> to the product last campaign"
+                if column == "Education":
+                    if most_common == "primary":
+                        description = "sedang menduduki <span style='color: #F56060;'>SD/sederajat</span>"
+                    elif most_common == "secondary":
+                        description = "sedang menduduki <span style='color: #F56060;'>SMP/SMA</span>"
+                    elif most_common == "tertiary":
+                        description = "sedang menempuh <span style='color: #F56060;'>pendidikan lanjut</span>"
+                    elif most_common == "unknown":
+                        description = "<span style='color: #F56060;'>tidak diketahui </span>jenjang pendidikannya"
+
+                if column == "Contact":
+                    if most_common == "cellular":
+                        description = "dihubungi melalui <span style='color: #F56060;'>telepon genggam</span>"
+                    elif most_common == "telephone":
+                        description = "dihubungi melalui <span style='color: #F56060;'>telepon kabel</span>"
+                    elif most_common == "unknown":
+                        description = "<span style='color: #F56060;'>tidak diketahui</span> metode kontaknya"
+
+                if column == "Marital":
+                    if most_common == "married":
+                        description = "sudah <span style='color: #F56060;'>menikah</span>"
+                    elif most_common == "single":
+                        description = "adalah <span style='color: #F56060;'>lajang</span>"
+                    elif most_common == "divorced":
+                        description = "sudah <span style='color: #F56060;'>cerai</span> dan belum menikah lagi"
+
                 else:
                     description = description.format(f"<span style='color: #F56060;'>{most_common}</span>")
 
                 st.markdown(
                     f"""
                     <div style="font-size: 35px; font-weight: bold; color: #F56060; display: inline;">{percentage}%</div>
-                    <div style="font-size: 16px; font-weight: bold; display: inline;"> {description}</div>
-                    <div style="font-size: 11px;">({count} people)</div>
+                    <div style="font-size: 15px; font-weight: bold; display: inline;"> {description}</div>
+                    <div style="font-size: 11px;">({count} orang)</div>
                     """,
                     unsafe_allow_html=True
                 )
 
-            display_percentage(df_yes, "Contact", "were contacted using {}")
-            display_percentage(df_yes, "Marital", "were {}")
-            display_percentage(df_yes, "Poutcome", "had an unknown outcome last campaign")
+            display_percentage(df_yes, "Contact")
+            display_percentage(df_yes, "Marital")
+            display_percentage(df_yes, "Education")
+
 
     st.markdown("<br>", unsafe_allow_html=True)
     col5_1, _, col5_2 = st.columns([0.3, 0.01, 1])
     with col5_1:
-        st.markdown("<div style='color: #FF4B4B;font-size: 27px;font-weight:bold;margin-bottom: 10px;'>Key Distributions</div>", unsafe_allow_html=True)
+        st.markdown("<div style='color: #FF4B4B;font-size: 27px;font-weight:bold;margin-bottom: 10px;'>Distribusi Data</div>", unsafe_allow_html=True)
     with col5_2:
-        show_successful = st.checkbox("Show Subscribed")
+        show_successful = st.checkbox("Berlangganan")
 
     col_left, col_right = st.columns(2)
 
@@ -366,22 +389,22 @@ if st.session_state.page == "Dataset Explorer":
             ("Housing", "Loan"), 
             ("Default", "Subscribed")
         ]
-        month_order = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        # month_order = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         for row in categoric_vars:
             cols = st.columns(len(row))
             for col, category in zip(cols, row):
                 counts = df[category].value_counts().reset_index()
                 counts.columns = [category, 'Count']
-                if category == "Month":
-                    counts[category] = pd.Categorical(counts[category], categories=month_order, ordered=True)
-                    counts = counts.sort_values(category)
+                # if category == "Month":
+                #     counts[category] = pd.Categorical(counts[category], categories=month_order, ordered=True)
+                #     counts = counts.sort_values(category)
                 fig = px.bar(counts, x=category, y='Count', opacity=0.7, color_discrete_sequence=["#B71C1C"], barmode='group')
                 if show_successful:
                     counts_successful = df[df['Subscribed'] == 'Yes'][category].value_counts().reset_index()
                     counts_successful.columns = [category, 'Count']
-                    if category == "Month":
-                        counts_successful[category] = pd.Categorical(counts_successful[category], categories=month_order, ordered=True)
-                        counts_successful = counts_successful.sort_values(category)
+                    # if category == "Month":
+                    #     counts_successful[category] = pd.Categorical(counts_successful[category], categories=month_order, ordered=True)
+                    #     counts_successful = counts_successful.sort_values(category)
                     fig.add_trace(px.bar(counts_successful, x=category, y='Count', opacity=0.7, color_discrete_sequence=[yes_color], barmode='group').data[0])
                 fig.update_traces(marker_line_width=0.5, marker_line_color='black')
                 fig.update_layout(
@@ -466,30 +489,59 @@ elif st.session_state.page == "Di Balik Data":
     with col2_2:
         st.markdown(
             """
-            <div style='color: #fafafa; font-size: 31px; font-weight: bold; text-align: right; display: flex; align-items: center; margin-bottom:20px;'>
-                Terungkap bahwa...
+            <style>
+                .highlight-box {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    padding: 20px;
+                    border-radius: 10px;
+                    box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.1);
+                    margin-bottom: 20px;
+                }
+                .highlight-text {
+                    color: #00C8FF; /* Warna skyblue */
+                    font-weight: bold;
+                }
+                .header-title {
+                    color: #fafafa;
+                    font-size: 34px;
+                    font-weight: bold;
+                    text-align: left;
+                    font-family: 'Poppins', sans-serif;
+                    margin-bottom: 15px;
+                }
+                .content-text {
+                    text-align: justify;
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+            </style>
+            
+            <div class="header-title">Terungkap bahwa...</div>
+            
+            <div class="highlight-box">
+                <p class="content-text">
+                    Kebanyakan klien <span class="highlight-text">tidak akan setuju berlangganan pada kontak pertama</span>. 
+                    Kemungkinan berhasil memenangkan klien yang belum pernah dihubungi sebelumnya sangatlah rendah. Namun, jangan menyerah! 
+                    Karena biasanya klien yang sudah dihubungi <span class="highlight-text">1-4 kali</span> di kampanye ini (apa pun hasilnya), 
+                    pada kampanye-kampanye berikutnya <span class="highlight-text">jauh lebih mungkin</span> untuk menerima tawaran, bahkan langsung pada kontak pertamanya.
+                </p>
+                <p class="content-text">
+                    Meski demikian, jika penjual tidak kunjung menghubungi kembali seorang klien hingga <span class="highlight-text">melebihi 3 bulan</span>, 
+                    ketertarikan klien tetap dapat menurun seiring waktu. Seandainya pada penghubungan kembali masih saja ditolak, 
+                    <span class="highlight-text">jangan menghubungi secara berlebihan</span>. Menghubungi klien hingga <span class="highlight-text">5 kali</span> dalam satu kampanye atau lebih terbukti 
+                    malah <span class="highlight-text">menurunkan ketertarikan</span>.
+                </p>
+                <p class="content-text">
+                    Dalam memilih klien, <span class="highlight-text">usia</span> dan <span class="highlight-text">saldo bank</span> layak dipertimbangkan. 
+                    Klien berusia <span class="highlight-text">lebih muda</span> (di bawah 33 tahun) cenderung lebih tertarik dengan tawaran deposito. 
+                    Hal ini sepertinya disebabkan masih tingginya motivasi untuk menabung dan mencari stabilitas finansial serta pengalaman investasi. 
+                    Klien-klien dengan <span class="highlight-text">uang lebih banyak</span> memiliki dana yang cukup untuk diinvestasikan tanpa mengganggu kebutuhannya, 
+                    membuat mereka lebih tertarik pada produk yang ditawarkan.
+                </p>
             </div>
             """,
             unsafe_allow_html=True
-        )        
-        st.markdown("""
-                 <div style='text-align:justify'>
-                Kebanyakan klien <span style="color:skyblue;">tidak akan setuju berlangganan pada kontak pertama</span>. Kemungkinan berhasil memenangkan klien yang belum pernah dihubungi sebelumnya
-                    sangatlah rendah. Namun, jangan menyerah! Karena biasanya klien yang sudah dihubungi <span style="color:skyblue;">1-4 kali</span> di kampanye ini (apa pun hasilnya),
-                    pada kampanye-kampanye berikutnya <span style="color:skyblue;">jauh lebih mungkin</span> untuk menerima tawaran, bahkan langsung pada kontak pertamanya.
-                    <br><br> 
-                Meski demikian, jika penjual tidak kunjung menghubungi kembali seorang klien hingga <span style="color:skyblue;">melebihi 3 bulan</span>, ketertarikan klien tetap
-                    dapat menurun seiring waktu. Seandainya pada penghubungan kembali masih saja ditolak,
-                    <span style="color:skyblue;">jangan menghubungi secara berlebihan</span>. Menghubungi klien hingga <span style="color:skyblue;">5 kali</span> dalam satu kampanye atau lebih terbukti malah <span style="color:skyblue;">menurunkan ketertarikan</span>.
-                    <br><br>
-                Dalam memilih klien, <span style="color:skyblue;">usia</span> dan <span style="color:skyblue;">saldo bank</span> layak dipertimbangkan.
-                    Klien berusia <span style="color:skyblue;">lebih muda</span> (di bawah 33 tahun) cenderung lebih tertarik dengan tawaran deposito. Hal ini sepertinya disebabkan masih tingginya
-                    motivasi untuk menabung dan mencari stabilitas finansial serta pengalaman investasi. Klien-klien dengan <span style="color:skyblue;">uang lebih banyak</span> memiliki dana yang cukup
-                    untuk diinvestasikan tanpa mengganggu kebutuhannya, membuat mereka lebih tertarik pada produk yang ditawarkan.
-                
-                </div>
-                 """,
-                 unsafe_allow_html=True)
+        )
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
