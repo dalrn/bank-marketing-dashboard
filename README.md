@@ -14,3 +14,26 @@ The full dataset was described and analyzed in:
 S. Moro, R. Laureano and P. Cortez. Using Data Mining for Bank Direct Marketing: An Application of the CRISP-DM Methodology.  
 In P. Novais et al. (Eds.), Proceedings of the European Simulation and Modelling Conference - ESM'2011, pp. 117-121, Guimarães,  
 Portugal, October, 2011. EUROSIS.
+More details about the dataset and its variables can be found [here](https://pastebin.com/B6b8qRgB)
+
+## ⚙️ Installation
+### 1️⃣ Clone this repository:
+```bash
+git clone https://github.com/dalrn/bank-marketing-dashboard.git
+cd bank-marketing-dashboard
+```
+
+### 2️⃣ Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### 3️⃣ Run the Streamlit app:
+```bash
+streamlit run dashboard.py
+```
+
+## 🖼 Screenshots
+
+!(.devcontainer/ss1.png)
+
