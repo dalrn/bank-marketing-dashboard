@@ -35,5 +35,13 @@ streamlit run dashboard.py
 
 ## 🖼 Screenshots
 
-!(.devcontainer/ss1.png)
+![](.devcontainer/ss1.png)
+![](.devcontainer/ss2.png)
+![](.devcontainer/ss3.png)
+![](.devcontainer/ss4.png)
+![](.devcontainer/ss5.png)
 
+## 👥 Contributors
+
+- [@sahdahx](https://github.com/sahdahx)
+- [@tiazara](https://github.com/tiazara)
