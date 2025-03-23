@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import altair as alt
 import plotly.express as px
-from segment_function import segment_age2, segment_balance, segment_campaign2, segment_duration, segment_pdays2, segment_previous2,\
+from functions import segment_age2, segment_balance, segment_campaign2, segment_duration, segment_pdays2, segment_previous2,\
 plot_segmented_variable, new_features, segment_age, segment_campaign, segment_previous, segment_pdays,\
 preprocess_dataframe, replace_outliers_series, apply_transform_series, outlier_process
 import joblib
@@ -41,7 +41,8 @@ st.markdown("""<h1 style='text-align: center; font-size: 35px; font-weight: bold
 
 st.markdown("<br><br>", unsafe_allow_html=True) 
 
-# Define custom styles for better visuals
+# ------------------------------ SIDEBAR -----------------------------
+
 st.sidebar.markdown(
     """
     <style>
@@ -107,7 +108,6 @@ if st.sidebar.button("💡 Di Balik Data", key="story"):
 if st.sidebar.button("🤖 Model Prediksi", key="predictive"):
     st.session_state.page = "Model Prediksi"
 
-# JavaScript to set active button styling
 st.sidebar.markdown(
     f"""
     <script>
@@ -119,12 +119,14 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-# Add dropdown for "About the Dataset"
+# "About the Dataset" Dropdown
 with st.sidebar.expander("Tentang Dataset"):
+
     st.markdown("""<div style='text-align: justify;'>
         Dataset ini berisi catatan kampanye pemasaran langsung dari sebuah institusi perbankan di Portugal dari Mei 2008 hingga November 2010.
         Produk yang ditawarkan adalah deposito berjangka, dan kampanye pemasaran dilakukan melalui panggilan telepon.
     </div>""", unsafe_allow_html=True)
+
     st.write("")
     st.markdown("""<div style='text-align: justify;'>
         Deskripsi lebih lanjut mengenai dataset dan setiap variabelnya dapat ditemukan di 
@@ -132,8 +134,10 @@ with st.sidebar.expander("Tentang Dataset"):
     </div>""", unsafe_allow_html=True)
 
 
+# ------------------------------ PAGE 1: DATASET EXPLORER ------------------------------
+
 if st.session_state.page == "Dataset Explorer":
-    # Divide the page into two columns with a little space between them
+
     col1, _, col2 = st.columns([0.8, 0.05, 2])
     
     with col1.container(height=820):
@@ -156,9 +160,9 @@ if st.session_state.page == "Dataset Explorer":
                 month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
                 unique_vals = sorted(unique_vals, key=lambda x: month_order.index(x))
 
-            st.markdown(f"Select **{cat}**:")  # Title for each categorical variable
+            st.markdown(f"Select **{cat}**:") 
 
-            col1_1, col1_2 = st.columns(2)  # Create three columns layout
+            col1_1, col1_2 = st.columns(2)
             selected_values[cat] = []
 
             # Loop through categories and assign checkboxes to columns
@@ -199,7 +203,7 @@ if st.session_state.page == "Dataset Explorer":
             with col2_3:
                 manual_max = st.text_input(f"Max {selected_num_var}", value=str(st.session_state[max_key]))
 
-            # Convert text inputs to float safely
+            # Convert text inputs to float
             try:
                 selected_min = float(manual_min)
                 selected_max = float(manual_max)
@@ -237,13 +241,15 @@ if st.session_state.page == "Dataset Explorer":
             df = df.sort_values(by=selected_sort_vars, ascending=(sort_order == "Menaik"))
 
     with col2:
+
+        # Display Dataset
         if show_missing:
             df = df.dropna()
         st.dataframe(df, hide_index=True, use_container_width=True)
         st.markdown(f"<div style='text-align: right; font-size: 14px'>Menunjukkan <strong style='color: #F56060;'>{len(df):,}</strong> catatan pemasaran</div>",
                     unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        # Split the second column into two sub-columns
+
         sub_col1, _, sub_col2 = st.columns([1.1, 0.01, 0.8])
         
         with sub_col1:
@@ -289,12 +295,14 @@ if st.session_state.page == "Dataset Explorer":
 
             st.altair_chart(chart+text)
         
+        # Donut Chart Description
         with sub_col2:
             st.markdown(f"""  
                 #### Dari <span style='color:{yes_color};'>{yes_percentage}%</span> yang berlangganan...  
             """, unsafe_allow_html=True)     
 
-            df_yes = df[df['Subscribed'] == 'Yes']      
+            df_yes = df[df['Subscribed'] == 'Yes']  
+
             def display_percentage(df, column):
                 most_common = df[column].value_counts().idxmax().lower()
                 count = df[column].value_counts().max()
@@ -342,7 +350,7 @@ if st.session_state.page == "Dataset Explorer":
             display_percentage(df_yes, "Marital")
             display_percentage(df_yes, "Education")
 
-
+    # Data Visualizations
     st.markdown("<br>", unsafe_allow_html=True)
     col5_1, _, col5_2 = st.columns([0.3, 0.01, 1])
     with col5_1:
@@ -420,6 +428,9 @@ if st.session_state.page == "Dataset Explorer":
                 )
                 col.plotly_chart(fig, use_container_width=True)
 
+
+# ------------------------------ PAGE 2: DI BALIK DATA ------------------------------
+
 elif st.session_state.page == "Di Balik Data":
     df2 = pd.read_csv('bank-full.csv')
     df2 = df2.rename(columns={'y': 'Subscribed'})
@@ -431,6 +442,7 @@ elif st.session_state.page == "Di Balik Data":
     success_rate = df2['Subscribed'].value_counts(normalize=True).get(1, 0) * 100
     avg_duration = df2['duration'].mean()
 
+    # Title
     st.markdown('<p style="margin-bottom:10px; font-size:18px; text-align:center;">📊 Data historis menunjukkan bahwa...</p>', unsafe_allow_html=True)
 
     st.markdown(f"""
@@ -462,6 +474,7 @@ elif st.session_state.page == "Di Balik Data":
 
     col1_2, _, col2_2 = st.columns([1.2,0.1,1])
 
+    # Section 1
     with col1_2.container(height=650):
 
         st.markdown("<div style='color: #fafafa;font-size: 27px;font-weight:bold;margin-bottom: 15px;'>Segmentasi Klien:<br>Distribusi dan Tingkat Kesuksesannya</div>", unsafe_allow_html=True)
@@ -543,6 +556,7 @@ elif st.session_state.page == "Di Balik Data":
             unsafe_allow_html=True
         )
 
+    # Section 2 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
     <div style="border: 2px solid #ff8000; padding: 10px; border-radius: 10px; background-color: #FFD8B0; text-align: left;">
@@ -580,7 +594,6 @@ elif st.session_state.page == "Di Balik Data":
             unsafe_allow_html=True
         )
 
-    # Create two rows with two columns each
     box1, _, box2 = st.columns([1,0.1,1])
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -588,7 +601,6 @@ elif st.session_state.page == "Di Balik Data":
 
     # First row
     with box1:
-        # Section Title
         st.markdown("""
             <div style="padding:10px; border-radius:10px; background-color:#1E1E1E; text-align:center;">
                 <span style="color:#FF9933; font-size:24px; font-weight:bold;">Durasi Kontak: Awal vs. Akhir Bulan</span>
@@ -659,9 +671,7 @@ elif st.session_state.page == "Di Balik Data":
             </div>
         """, unsafe_allow_html=True)
         
-
     with box2:
-        # Section Title
         st.markdown("""
             <div style="padding:10px; border-radius:10px; background-color:#1E1E1E; text-align:center;">
                 <span style="color:#FF9933; font-size:24px; font-weight:bold;">Durasi Kontak: Awal vs. Akhir Tahun</span>
@@ -734,7 +744,6 @@ elif st.session_state.page == "Di Balik Data":
         """, unsafe_allow_html=True)
 
 
-
     # Second row
     with box3:
         st.markdown("""
@@ -748,7 +757,6 @@ elif st.session_state.page == "Di Balik Data":
                 🤷 <b> Kontak dengan klien yang keputusan terakhirnya belum jelas berlangsung lebih lama!</b>
             </p>
         """, unsafe_allow_html=True)
-
 
         box3_1, box3_2 = st.columns(2)
 
@@ -818,7 +826,6 @@ elif st.session_state.page == "Di Balik Data":
 
 
     with box4:
-        # Section Title
         st.markdown("""
             <div style="padding:10px; border-radius:10px; background-color:#1E1E1E; text-align:center;">
                 <span style="color:#FF9933; font-size:24px; font-weight:bold;">Durasi Kontak: Sudah vs. Belum Pernah Dihubungi</span>
@@ -877,6 +884,7 @@ elif st.session_state.page == "Di Balik Data":
             <p style="font-size:14px; color:#FAFAFA; text-align:center;">
                 Klien baru mungkin <b>belum memiliki pengalaman dikontak sebelumnya</b> dan perlu memahami lebih lanjut, sehingga lebih bersedia meluangkan waktu.
         """, unsafe_allow_html=True)
+
         # Call-to-Action Box
         st.markdown("""
             <div style="border: 2px solid #FFB266; padding: 15px; border-radius: 10px; background-color: #1E1E1E; text-align: center;">
@@ -888,11 +896,13 @@ elif st.session_state.page == "Di Balik Data":
         """, unsafe_allow_html=True)
 
 
+# ------------------------------ PAGE 3: MODEL PREDIKSI ------------------------------
+
 elif st.session_state.page == "Model Prediksi":
 
-    pipeline_prep = joblib.load('pipeline_prep.pkl')
-    pipeline_trans = joblib.load('pipeline_trans.pkl')
-    final_model = joblib.load('final_model.pkl')
+    pipeline_prep = joblib.load('models/pipeline_prep.pkl')
+    pipeline_trans = joblib.load('models/pipeline_trans.pkl')
+    final_model = joblib.load('models/final_model.pkl')
 
     st.title("Akankah Klien Berlangganan Deposito Berjangka?")
 
@@ -946,6 +956,7 @@ elif st.session_state.page == "Model Prediksi":
         poutcome = st.selectbox("Hasil Kontak Terakhir", list(poutcome_mapping.keys()))
 
     col1_2, col2_2 = st.columns(2)
+
     with col1_2:
         col1_2_1, col1_2_2 = st.columns([0.3, 1])
         with col1_2_1:
@@ -969,3 +980,21 @@ elif st.session_state.page == "Model Prediksi":
             prediction = final_model.predict(input_transformed)
             result = "✅ Klien akan berlangganan!💰" if prediction[0] == 1 else "❌ Klien belum berlangganan. Mungkin di kontak berikutnya!⏳"
             st.subheader(f"{result}")
+
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        bottom: 10px;
+        right: 20px;
+        font-size: 14px;
+        color: gray;
+    }
+    </style>
+    <div class="footer">
+        © 2025 maba sibuk
+    </div>
+    """,
+    unsafe_allow_html=True
+)
