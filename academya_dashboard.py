@@ -900,9 +900,9 @@ elif st.session_state.page == "Di Balik Data":
 
 elif st.session_state.page == "Model Prediksi":
 
-    pipeline_prep = joblib.load('models/pipeline_prep.pkl')
-    pipeline_trans = joblib.load('models/pipeline_trans.pkl')
-    final_model = joblib.load('models/final_model.pkl')
+    pipeline_prep = joblib.load('pipeline_prep.pkl')
+    pipeline_trans = joblib.load('pipeline_trans.pkl')
+    final_model = joblib.load('final_model.pkl')
 
     st.title("Akankah Klien Berlangganan Deposito Berjangka?")
 
