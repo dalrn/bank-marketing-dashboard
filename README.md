@@ -1,11 +1,11 @@
 # 📊 Bank Marketing Performance Dashboard  
 
-An interactive **Streamlit** dashboard for analyzing bank marketing campaign data. This app provides **data visualizations, filtering options, and predictive modeling** to explore customer subscription behavior.
+An interactive **Streamlit** dashboard for analyzing bank marketing campaign data. This app provides **filtering options, data visualizations, business insights, and predictive modeling** to explore customer subscription behavior.
 
 ## 🚀 Features  
 ✅ Interactive **filters** for categorical & numerical variables  
-✅ **Data visualizations and analysis** (charts, tables, statistics)  
-✅ **Predictive modeling** for campaign performance  
+✅ **Data visualizations and business insights** (through charts, tables, statistics)  
+✅ **Predictive modeling** for future campaigns reference  
 
 ## 📂 Dataset  
 The dataset contains historical records of direct marketing campaigns of a Portuguese banking institution from May 2008 to November 2010. The product offered were term deposits and the marketing campaigns were based on phone calls.  
